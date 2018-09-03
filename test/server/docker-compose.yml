@@ -1,0 +1,9 @@
+version: '3'
+services:
+    machine:
+        build: .
+
+    ansible:
+        image: my-ansible
+        volumes:
+            - "/home/kun/Research/ansible/test:/root/test"

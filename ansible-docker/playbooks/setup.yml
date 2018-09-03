@@ -1,0 +1,53 @@
+---
+# Provision all hosts
+- hosts: all
+  remote_user: root
+
+  tasks:
+    # Install Git binary.
+    # Git is necessary to download our NodeJS project from Github.
+    - name: Install Git
+      include_role:
+        name: ANXS.git
+
+    # Downloads the Node project from Github and save
+    # on `hello-world/` directory
+    - name: Download project
+      git:
+        repo: 'https://github.com/azat-co/nodejs-hello-world'
+        dest: 'hello-world'
+
+    # Install NodeJS library
+    - name: Install NodeJS
+      include_role:
+        name: geerlingguy.nodejs
+
+    # Install all the necessary Node modules for the project,
+    # using `npm`.
+    - name: Install project dependencies
+      command: npm install
+      args:
+        chdir: hello-world/
+
+    # Install Forever tool.
+    # This tool is used to run the Node server in background
+    # and keep tracking of the running process
+    - name: Install Forever
+      npm: name=forever global=yes state=present
+
+    # This is an auxiliary task, used to identify if our Node service
+    # is already running (avoids restarting the service on each playbook
+    # execution)
+    - name: Get Forever's list of running processes
+      command: forever list
+      register: forever_list
+      changed_when: false
+
+    # Start the node server using "Foverer"
+    # The `when` clause identifies if the server is already
+    # running. If so, this task is skipped
+    - name: Start service
+      command: forever start web.js
+      when: "forever_list.stdout.find('hello-world/web.js') == -1"
+      args:
+        chdir: hello-world/

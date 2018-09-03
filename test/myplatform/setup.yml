@@ -1,0 +1,27 @@
+ - hosts: all
+   remote_user: root
+   vars:
+       ansible_ssh_pass: 'ansible'
+
+   tasks:
+       - name: set authorized key took from file
+         authorized_key:
+            user: root 
+            state: present
+            key: "{{ lookup('file', 'id_rsa.pub')}}"
+
+       - name: create testuser
+         user:
+            name: testuser
+            create_home: yes
+            password: '$6$JKFk69NtZhZ.5OKS$YInyFyFW49TdDC5RpK3nUnAxcHbmPeTJy.wtV1uLAH53E4MuYwU3trzJmnve0g7BQdTCR7iY0/e4T9zE0HAkE1'
+            state: present
+            groups: sudo
+         
+       - name: set authorized key took from file
+         authorized_key:
+             user: testuser 
+             state: present 
+             key: "{{ lookup('file', 'id_rsa.pub')}}"
+
+       

@@ -1,0 +1,10 @@
+---
+- hosts: all
+  become: true
+  roles:
+  - basic
+
+- hosts: server_machine_1
+  become: true
+  roles:
+  - webserver
